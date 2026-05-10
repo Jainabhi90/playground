@@ -12,9 +12,3 @@ The environment consists of two hosts:
 
 Note: The current terminal is on the host `controlplane`.
 
-In this scenario, the `foreground.sh` script has pre-staged the following helper scripts and YAML manifests for you:
-
-- `~/installMetrics.sh` — installs `metrics-server` on the member clusters (required for FHPA)
-- `~/fhpa/nginxDeployment.yaml` — nginx Deployment (1 replica) + Service
-- `~/fhpa/propagationPolicy.yaml` — PropagationPolicy distributing nginx equally across both clusters
-- `~/fhpa/federatedHPA.yaml` — FederatedHPA targeting CPU utilization

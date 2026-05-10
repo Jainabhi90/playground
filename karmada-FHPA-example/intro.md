@@ -6,12 +6,6 @@ Karmada aims to provide turnkey automation for multi-cluster application managem
 
 # What is FederatedHPA?
 
-**FederatedHPA** (Federated Horizontal Pod Autoscaler) is a Karmada-native API resource that scales up or down the replicas of a workload across multiple clusters automatically, based on observed metrics such as CPU or memory utilization.
-
 When load increases, FederatedHPA scales up the replicas of the workload if the number of Pods is below the configured maximum. When load decreases, it scales them back down to the configured minimum.
 
-In this scenario, we will:
-- Set up the Karmada control plane and join two member clusters
-- Deploy an nginx workload distributed across both clusters
-- Create a FederatedHPA targeting CPU utilization
-- Trigger a CPU load and observe autoscaling across clusters
+In this scenario, we will create a FederatedHPA targeting CPU utilization, and trigger a CPU load to observe autoscaling across clusters.
