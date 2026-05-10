@@ -4,7 +4,9 @@
 
 Before generating load, confirm the current pod distribution across clusters:
 
-RUN `karmadactl --kubeconfig /etc/karmada/karmada-apiserver.config get pods`{{exec}}
+RUN `kubectl --kubeconfig=$HOME/.kube/config-member1 get pods`{{exec}}
+
+RUN `kubectl --kubeconfig=$HOME/.kube/config-member2 get pods`{{exec}}
 
 You should see 1 pod total, scheduled to one of the member clusters.
 
@@ -34,7 +36,9 @@ The `REPLICAS` column should have increased above 1 as the FederatedHPA responds
 
 Check the pod distribution across member clusters:
 
-RUN `karmadactl --kubeconfig /etc/karmada/karmada-apiserver.config get pods`{{exec}}
+RUN `kubectl --kubeconfig=$HOME/.kube/config-member1 get pods`{{exec}}
+
+RUN `kubectl --kubeconfig=$HOME/.kube/config-member2 get pods`{{exec}}
 
 You should now see multiple pods spread across both `kind-member1` and `kind-member2`.
 
@@ -48,7 +52,9 @@ Go back to your **first terminal tab** and stop the load generator by pressing `
 
 Wait ~15–30 seconds for the stabilization window to expire and the CPU average to drop, then check:
 
-RUN `karmadactl --kubeconfig /etc/karmada/karmada-apiserver.config get pods`{{exec}}
+RUN `kubectl --kubeconfig=$HOME/.kube/config-member1 get pods`{{exec}}
+
+RUN `kubectl --kubeconfig=$HOME/.kube/config-member2 get pods`{{exec}}
 
 The total replica count should return to 1 as the FederatedHPA scales back down.
 
