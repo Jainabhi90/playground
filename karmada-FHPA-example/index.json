@@ -33,19 +33,29 @@
         "verify": "step5/verify.sh"
       },
       {
-        "title": "Deploy nginx workload",
+        "title": "Install metrics-server on member clusters",
         "text": "step6/text.md",
         "verify": "step6/verify.sh"
       },
       {
-        "title": "Create PropagationPolicy & Deploy FederatedHPA",
+        "title": "Deploy nginx workload",
         "text": "step7/text.md",
         "verify": "step7/verify.sh"
       },
       {
-        "title": "Trigger load and observe autoscaling",
+        "title": "Create PropagationPolicy",
         "text": "step8/text.md",
         "verify": "step8/verify.sh"
+      },
+      {
+        "title": "Deploy FederatedHPA",
+        "text": "step9/text.md",
+        "verify": "step9/verify.sh"
+      },
+      {
+        "title": "Trigger load and observe autoscaling",
+        "text": "step10/text.md",
+        "verify": "step10/verify.sh"
       }
     ],
     "finish": {
