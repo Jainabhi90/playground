@@ -1,16 +1,18 @@
-# Deploy FederatedHPA
+# Configure Multi-Cluster Routing
 
-**Apply the FederatedHPA:**
+To allow requests to seamlessly route to our `nginx` pod regardless of which member cluster it is scheduled on, we need to configure Karmada Multi-Cluster Services (MCS).
 
-RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config apply -f ~/fhpa/federatedHPA.yaml`{{exec}}
+**1. Apply the ServiceExport and ServiceImport configurations:**
 
-This creates a `FederatedHPA` that monitors the CPU utilization of all nginx pods across both member clusters via the `karmada-metrics-adapter`.
-- When average CPU exceeds **10%**, it scales up replicas (up to 10).
-- When load drops, it scales back down (to a minimum of 1).
-- The stabilization window is configured to 10 seconds so we can observe the scaling actions quickly.
+RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config apply -f ~/fhpa/serviceExportImport.yaml`{{exec}}
 
-**Verify the FederatedHPA was created:**
+This file does a few things:
+- Propagates the `ServiceExport` and `ServiceImport` CRDs to the member clusters.
+- Creates a `ServiceExport` object so the `nginx-service` can be discovered across clusters.
+- Creates a `ServiceImport` object to expose the `nginx-service` in member clusters.
 
-RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get federatedhpa nginx-fhpa`{{exec}}
+**2. Verify the Multi-Cluster Service:**
 
-You should see `nginx-fhpa` listed with `MINPODS=1`, `MAXPODS=10`, and `REPLICAS=1`.
+RUN `karmadactl --kubeconfig /etc/karmada/karmada-apiserver.config get svc --operation-scope members`{{exec}}
+
+You should see a new service named `derived-nginx-service` (the imported service) running on the member clusters. This is the service we will use to generate load!

@@ -12,8 +12,6 @@ RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get propagationp
 
 **Verify pods are running on member clusters:**
 
-RUN `kubectl --kubeconfig=$HOME/.kube/config-member1 get pods`{{exec}}
+RUN `karmadactl --kubeconfig /etc/karmada/karmada-apiserver.config get pods --operation-scope members`{{exec}}
 
-RUN `kubectl --kubeconfig=$HOME/.kube/config-member2 get pods`{{exec}}
-
-> **Note:** It takes a moment for the scheduler to propagate the workload and for the clusters to download the image. If you see "No resources found", wait ~30 seconds and re-run the commands. You should see 1 pod running on one of the member clusters (since replicas is 1).
+> **Note:** It takes a moment for the scheduler to propagate the workload and for the clusters to download the image. If you see "No resources found", wait ~30 seconds and re-run the command. You should see 1 pod running on one of the member clusters (since replicas is 1).

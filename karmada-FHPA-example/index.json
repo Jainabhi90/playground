@@ -48,14 +48,19 @@
         "verify": "step8/verify.sh"
       },
       {
-        "title": "Deploy FederatedHPA",
+        "title": "Configure Multi-Cluster Routing",
         "text": "step9/text.md",
         "verify": "step9/verify.sh"
       },
       {
-        "title": "Trigger load and observe autoscaling",
+        "title": "Deploy FederatedHPA",
         "text": "step10/text.md",
         "verify": "step10/verify.sh"
+      },
+      {
+        "title": "Trigger load and observe autoscaling",
+        "text": "step11/text.md",
+        "verify": "step11/verify.sh"
       }
     ],
     "finish": {
