@@ -6,6 +6,8 @@ Before generating load, confirm the current pod distribution:
 
 RUN `karmadactl --kubeconfig /etc/karmada/karmada-apiserver.config get pods --operation-scope members`{{exec}}
 
+> *Note: As before, you can safely ignore any `metrics.k8s.io` Unhandled Error warnings if they appear.*
+
 You should see 1 pod total.
 
 ---

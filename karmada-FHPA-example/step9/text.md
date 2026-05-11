@@ -15,4 +15,6 @@ This file does a few things:
 
 RUN `karmadactl --kubeconfig /etc/karmada/karmada-apiserver.config get svc --operation-scope members`{{exec}}
 
+> *Note: If you see `Unhandled Error` warnings regarding metrics, you can safely ignore them.*
+
 You should see a new service named `derived-nginx-service` (the imported service) running on the member clusters. This is the service we will use to generate load!

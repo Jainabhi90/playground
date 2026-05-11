@@ -15,3 +15,5 @@ RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get propagationp
 RUN `karmadactl --kubeconfig /etc/karmada/karmada-apiserver.config get pods --operation-scope members`{{exec}}
 
 > **Note:** It takes a moment for the scheduler to propagate the workload and for the clusters to download the image. If you see "No resources found", wait ~30 seconds and re-run the command. You should see 1 pod running on one of the member clusters (since replicas is 1).
+> 
+> *Troubleshooting:* If you see several lines of `Unhandled Error` regarding `metrics.k8s.io`, this is completely normal! It just means the Karmada metrics adapter is still starting up in the background. You can safely ignore these warnings as long as the pod is listed at the bottom.
