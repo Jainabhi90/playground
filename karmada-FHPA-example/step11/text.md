@@ -12,13 +12,21 @@ You should see 1 pod total.
 
 ---
 
+## Install load testing tool
+
+We will use the `hey` tool to send requests to our multi-cluster service. Let's install it on `member1`:
+
+RUN `wget -O hey https://storage.googleapis.com/hey-releases/hey_linux_amd64 && chmod +x hey && docker cp hey member1-control-plane:/usr/local/bin/hey`{{exec}}
+
+---
+
 ## Generate CPU load
 
-We will use the `hey` load testing tool to send requests to our multi-cluster `nginx-service`.
+We need to hit the exact ClusterIP of our `nginx-service`. Let's fetch the IP and start the load generation!
 
-RUN `kubectl --kubeconfig=$HOME/.kube/config-member1 run load-generator --image=williamyeh/hey --restart=Never -- -c 1000 -z 1m http://nginx-service`{{exec}}
+RUN `SVC_IP=$(kubectl --kubeconfig=$HOME/.kube/config-member1 get svc nginx-service -o jsonpath='{.spec.clusterIP}') && docker exec member1-control-plane hey -c 1000 -z 1m http://$SVC_IP`{{exec}}
 
-This launches a background pod inside `kind-member1` that continuously sends HTTP requests to the `nginx-service` for exactly 1 minute, and then automatically stops.
+This continuously sends HTTP requests to the `nginx-service` for exactly 1 minute, and then automatically stops.
 
 ---
 
