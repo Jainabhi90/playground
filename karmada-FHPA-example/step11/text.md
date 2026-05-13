@@ -14,11 +14,11 @@ You should see 1 pod total.
 
 ## Generate CPU load
 
-We will use the `hey` load testing tool to send requests to our multi-cluster `derived-nginx-service`.
+We will use the `hey` load testing tool to send requests to our multi-cluster `nginx-service`.
 
-RUN `kubectl --kubeconfig=$HOME/.kube/config-member1 run load-generator --image=williamyeh/hey --restart=Never -- -c 1000 -z 1m http://derived-nginx-service`{{exec}}
+RUN `kubectl --kubeconfig=$HOME/.kube/config-member1 run load-generator --image=williamyeh/hey --restart=Never -- -c 1000 -z 1m http://nginx-service`{{exec}}
 
-This launches a background pod inside `kind-member1` that continuously sends HTTP requests to the `derived-nginx-service` for exactly 1 minute, and then automatically stops.
+This launches a background pod inside `kind-member1` that continuously sends HTTP requests to the `nginx-service` for exactly 1 minute, and then automatically stops.
 
 ---
 

@@ -171,83 +171,21 @@ spec:
 EOF
 }
 
-function serviceExportImport() {
-    cat << EOF > serviceExportImport.yaml
-# propagate ServiceExport CRD
-apiVersion: policy.karmada.io/v1alpha1
-kind: ClusterPropagationPolicy
-metadata:
-  name: serviceexport-policy
-spec:
-  resourceSelectors:
-    - apiVersion: apiextensions.k8s.io/v1
-      kind: CustomResourceDefinition
-      name: serviceexports.multicluster.x-k8s.io
-  placement:
-    clusterAffinity:
-      clusterNames:
-        - kind-member1
-        - kind-member2
----        
-# propagate ServiceImport CRD
-apiVersion: policy.karmada.io/v1alpha1
-kind: ClusterPropagationPolicy
-metadata:
-  name: serviceimport-policy
-spec:
-  resourceSelectors:
-    - apiVersion: apiextensions.k8s.io/v1
-      kind: CustomResourceDefinition
-      name: serviceimports.multicluster.x-k8s.io
-  placement:
-    clusterAffinity:
-      clusterNames:
-        - kind-member1
-        - kind-member2
----
-apiVersion: multicluster.x-k8s.io/v1alpha1
-kind: ServiceExport
-metadata:
-  name: nginx-service
----
-apiVersion: policy.karmada.io/v1alpha1
-kind: PropagationPolicy
-metadata:
-  name: serve-export-policy
-spec:
-  resourceSelectors:
-    - apiVersion: multicluster.x-k8s.io/v1alpha1
-      kind: ServiceExport
-      name: nginx-service
-  placement:
-    clusterAffinity:
-      clusterNames:
-        - kind-member1
-        - kind-member2
----
-apiVersion: multicluster.x-k8s.io/v1alpha1
-kind: ServiceImport
+function multiClusterService() {
+    cat << EOF > multiClusterService.yaml
+apiVersion: networking.karmada.io/v1alpha1
+kind: MultiClusterService
 metadata:
   name: nginx-service
 spec:
-  type: ClusterSetIP
-  ports:
-  - port: 80
-    protocol: TCP
----
-apiVersion: policy.karmada.io/v1alpha1
-kind: PropagationPolicy
-metadata:
-  name: serve-import-policy
-spec:
-  resourceSelectors:
-    - apiVersion: multicluster.x-k8s.io/v1alpha1
-      kind: ServiceImport
-      name: nginx-service
-  placement:
-    clusterAffinity:
-      clusterNames:
-        - kind-member1
+  types:
+    - CrossCluster
+  consumerClusters:
+    - name: kind-member1
+    - name: kind-member2
+  providerClusters:
+    - name: kind-member1
+    - name: kind-member2
 EOF
 }
 
@@ -278,7 +216,7 @@ cd ~/fhpa
 nginxDeployment
 propagationPolicy
 federatedHPA
-serviceExportImport
+multiClusterService
 cd ~
 
 # clean screen 
