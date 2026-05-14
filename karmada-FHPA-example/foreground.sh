@@ -57,11 +57,18 @@ EOF
 
 function installMetrics() {
     cat << 'EOF' > installMetrics.sh
+# Install metrics-server on member clusters
 kubectl --kubeconfig=$HOME/.kube/config-member1 apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-kubectl --kubeconfig=$HOME/.kube/config-member1 patch deployment metrics-server -n kube-system --type 'json' -p '[{"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--kubelet-insecure-tls"}]'
+kubectl --kubeconfig=$HOME/.kube/config-member1 patch deployment metrics-server -n kube-system --type='json' \
+  -p='[{"op":"replace","path":"/spec/template/spec/containers/0/args","value":["--cert-dir=/tmp","--secure-port=10250","--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname","--kubelet-use-node-status-port","--metric-resolution=15s","--kubelet-insecure-tls","--authentication-skip-lookup=true"]}]'
 
 kubectl --kubeconfig=$HOME/.kube/config-member2 apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-kubectl --kubeconfig=$HOME/.kube/config-member2 patch deployment metrics-server -n kube-system --type 'json' -p '[{"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--kubelet-insecure-tls"}]'
+kubectl --kubeconfig=$HOME/.kube/config-member2 patch deployment metrics-server -n kube-system --type='json' \
+  -p='[{"op":"replace","path":"/spec/template/spec/containers/0/args","value":["--cert-dir=/tmp","--secure-port=10250","--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname","--kubelet-use-node-status-port","--metric-resolution=15s","--kubelet-insecure-tls","--authentication-skip-lookup=true"]}]'
+
+# Install karmada-metrics-adapter on the Karmada control plane
+# This bridges metrics from member clusters to the FederatedHPA controller
+karmadactl addons enable karmada-metrics-adapter --kubeconfig=$HOME/.kube/config
 EOF
     chmod +x installMetrics.sh
 }
