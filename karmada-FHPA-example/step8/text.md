@@ -1,19 +1,23 @@
-# Create PropagationPolicy
+# Deploy nginx Workload
 
-**Apply the PropagationPolicy:**
+**Apply the nginx Deployment and Service:**
 
-RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config apply -f ~/fhpa/propagationPolicy.yaml`{{exec}}
+RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config apply -f ~/fhpa/nginxDeployment.yaml`{{exec}}
 
-This policy selects the nginx Deployment and Service, and uses `replicaDivisionPreference: Weighted` (1:1 static weight ratio) to distribute replicas across `kind-member1` and `kind-member2`.
+This creates the nginx workload (1 replica) and a ClusterIP Service in the Karmada control plane.
 
-**Verify the policy was created:**
+> **Crucial Detail for Autoscaling:** The Deployment includes explicit CPU `requests` and `limits`. CPU-based autoscaling will not work without these resource boundaries defined on the containers.
 
-RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get propagationpolicy nginx-propagation`{{exec}}
+**Verify the Deployment exists:**
 
-**Verify pods are running on member clusters:**
+RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get deployment nginx`{{exec}}
 
-RUN `karmadactl --kubeconfig /etc/karmada/karmada-apiserver.config get pods --operation-scope members`{{exec}}
+This confirms the nginx Deployment has been created in the Karmada control plane.
 
-> **Note:** It takes a moment for the scheduler to propagate the workload and for the clusters to download the image. If you see "No resources found", wait ~30 seconds and re-run the command. You should see 1 pod running on one of the member clusters (since replicas is 1).
-> 
-> *Troubleshooting:* If you see several lines of `Unhandled Error` regarding `metrics.k8s.io`, this is completely normal! It just means the Karmada metrics adapter is still starting up in the background. You can safely ignore these warnings as long as the pod is listed at the bottom.
+**Verify the Service exists:**
+
+RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get service nginx-service`{{exec}}
+
+This confirms the nginx-service has been created.
+
+> **Note:** At this point the workload exists only on the Karmada control plane. It will be propagated to member clusters in the next step.

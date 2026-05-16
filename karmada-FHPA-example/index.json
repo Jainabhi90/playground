@@ -38,29 +38,34 @@
         "verify": "step6/verify.sh"
       },
       {
-        "title": "Deploy nginx workload",
+        "title": "Install karmada-metrics-adapter",
         "text": "step7/text.md",
         "verify": "step7/verify.sh"
       },
       {
-        "title": "Create PropagationPolicy",
+        "title": "Deploy nginx workload",
         "text": "step8/text.md",
         "verify": "step8/verify.sh"
       },
       {
-        "title": "Configure Multi-Cluster Routing",
+        "title": "Create PropagationPolicy",
         "text": "step9/text.md",
         "verify": "step9/verify.sh"
       },
       {
-        "title": "Deploy FederatedHPA",
+        "title": "Configure Multi-Cluster Routing",
         "text": "step10/text.md",
         "verify": "step10/verify.sh"
       },
       {
-        "title": "Trigger load and observe autoscaling",
+        "title": "Deploy FederatedHPA",
         "text": "step11/text.md",
         "verify": "step11/verify.sh"
+      },
+      {
+        "title": "Trigger load and observe autoscaling",
+        "text": "step12/text.md",
+        "verify": "step12/verify.sh"
       }
     ],
     "finish": {

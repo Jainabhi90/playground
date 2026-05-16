@@ -1,17 +1,19 @@
-# Configure Multi-Cluster Routing
+# Create PropagationPolicy
 
-To allow requests to seamlessly route to our `nginx` pod regardless of which member cluster it is scheduled on, we need to configure Karmada Multi-Cluster Services (MCS).
+**Apply the PropagationPolicy:**
 
-**1. Apply the MultiClusterService configuration:**
+RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config apply -f ~/fhpa/propagationPolicy.yaml`{{exec}}
 
-RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config apply -f ~/fhpa/multiClusterService.yaml`{{exec}}
+This policy selects the nginx Deployment and Service, and uses `replicaDivisionPreference: Weighted` (1:1 static weight ratio) to distribute replicas across `kind-member1` and `kind-member2`.
 
-This file creates a `MultiClusterService` object to enable cross-cluster access for the `nginx-service` across `kind-member1` and `kind-member2`. When a client in one member cluster accesses the service, the request can be routed to backend pods in both clusters.
+**Verify the policy was created:**
 
-**2. Verify the Multi-Cluster Service:**
+RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get propagationpolicy nginx-propagation`{{exec}}
 
-RUN `karmadactl --kubeconfig /etc/karmada/karmada-apiserver.config get svc --operation-scope members`{{exec}}
+**Verify pods are running on member clusters:**
 
-> *Note: If you see `Unhandled Error` warnings regarding metrics, you can safely ignore them.*
+RUN `karmadactl --kubeconfig /etc/karmada/karmada-apiserver.config get pods --operation-scope members`{{exec}}
 
-You should see the `nginx-service` running on the member clusters. This is the service we will use to generate load!
+> **Note:** It takes a moment for the scheduler to propagate the workload and for the clusters to download the image. If you see "No resources found", wait ~30 seconds and re-run the command. You should see 1 pod running on one of the member clusters (since replicas is 1).
+> 
+> *Troubleshooting:* If you see several lines of `Unhandled Error` regarding `metrics.k8s.io`, this is completely normal! It just means the Karmada metrics adapter is still starting up in the background. You can safely ignore these warnings as long as the pod is listed at the bottom.

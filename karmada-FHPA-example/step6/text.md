@@ -1,9 +1,7 @@
-### Install metrics-server and karmada-metrics-adapter
+### Install metrics-server on member clusters
 
-The FederatedHPA relies on a two-layer metrics pipeline:
-- **`metrics-server`** runs on each member cluster and collects per-pod CPU/memory data.
-- **`karmada-metrics-adapter`** runs on the Karmada control plane and aggregates those metrics so the FederatedHPA controller can read them.
+The FederatedHPA relies on a two-layer metrics pipeline. First, `metrics-server` runs on each member cluster and collects per-pod CPU and memory data.
 
-RUN `bash ~/installMetrics.sh`{{exec}}
+RUN `bash ~/installMetricsServer.sh`{{exec}}
 
-This script installs `metrics-server` on both `kind-member1` and `kind-member2`, and then enables the `karmada-metrics-adapter` addon on the Karmada control plane. Wait a few moments for the pods to start before proceeding.
+This script installs `metrics-server` on both `kind-member1` and `kind-member2`. Wait a few moments for the pods to start before proceeding.

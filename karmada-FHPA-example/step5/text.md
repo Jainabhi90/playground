@@ -24,3 +24,9 @@
 
    This command lists all the member clusters that have successfully joined the Karmada control plane.
 
+3. The following image shows the expected output, indicating that the member clusters have been joined successfully.
+
+![Joined clusters](../image/success.png)
+
+**Note:** If a join command fails due to a transient issue, rerun that specific join command.
+

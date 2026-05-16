@@ -1,49 +1,16 @@
-# Trigger Load and Observe Autoscaling
+# Deploy FederatedHPA
 
-## Check baseline pod distribution
+**Apply the FederatedHPA:**
 
-Before generating load, confirm the current pod distribution:
+RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config apply -f ~/fhpa/federatedHPA.yaml`{{exec}}
 
-RUN `karmadactl --kubeconfig /etc/karmada/karmada-apiserver.config get pods --operation-scope members`{{exec}}
+This creates a `FederatedHPA` that monitors the CPU utilization of all nginx pods across both member clusters via the `karmada-metrics-adapter`.
+- When average CPU exceeds **10%**, it scales up replicas (up to 10).
+- When load drops, it scales back down (to a minimum of 1).
+- The stabilization window is configured to 10 seconds so we can observe the scaling actions quickly.
 
-> *Note: As before, you can safely ignore any `metrics.k8s.io` Unhandled Error warnings if they appear.*
-
-You should see 1 pod total.
-
----
-
-## Generate CPU load
-
-Since the member clusters are running on a different VM in this environment, we will generate load by running a pod directly inside `kind-member1`. To bypass any potential DNS resolution delays, we will target the `ClusterIP` of the service directly!
-
-RUN `SVC_IP=$(kubectl --kubeconfig=$HOME/.kube/config-member1 get svc nginx-service -o jsonpath='{.spec.clusterIP}') && kubectl --kubeconfig=$HOME/.kube/config-member1 run load-generator --image=williamyeh/hey --restart=Never -- -c 1000 -z 1m http://$SVC_IP`{{exec}}
-
-This launches a background pod inside `kind-member1` that continuously sends HTTP requests to the `nginx-service` for exactly 1 minute, and then automatically stops.
-
----
-
-## Observe scale-up
-
-Wait ~15–30 seconds after starting the load, then check the FederatedHPA status:
+**Verify the FederatedHPA was created:**
 
 RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get federatedhpa nginx-fhpa`{{exec}}
 
-The `REPLICAS` column should have increased above 1.
-
-Check the pod distribution:
-
-RUN `karmadactl --kubeconfig /etc/karmada/karmada-apiserver.config get pods --operation-scope members`{{exec}}
-
-You should now see multiple pods spread across both `kind-member1` and `kind-member2`.
-
----
-
-## Observe scale-down
-
-Since the `hey` tool automatically stops after 1 minute, you don't need to do anything to stop the load!
-
-Wait about a minute for the load to finish and the stabilization window to expire, then check the pods again:
-
-RUN `karmadactl --kubeconfig /etc/karmada/karmada-apiserver.config get pods --operation-scope members`{{exec}}
-
-The total replica count should return to 1 as the FederatedHPA scales back down.
+You should see `nginx-fhpa` listed with `MINPODS=1`, `MAXPODS=10`, and `REPLICAS=1`.
