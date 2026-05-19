@@ -72,11 +72,11 @@ function installMetrics() {
 # Install metrics-server on member clusters
 kubectl --kubeconfig=$HOME/.kube/config-member1 apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 kubectl --kubeconfig=$HOME/.kube/config-member1 patch deployment metrics-server -n kube-system --type='json' \
-  -p='[{"op":"replace","path":"/spec/template/spec/containers/0/args","value":["--cert-dir=/tmp","--secure-port=10250","--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname","--kubelet-use-node-status-port","--metric-resolution=15s","--kubelet-insecure-tls","--authentication-skip-lookup=true"]},{"op":"replace","path":"/spec/template/spec/containers/0/resources","value":{"requests":{"cpu":"10m","memory":"32Mi"},"limits":{"cpu":"100m","memory":"128Mi"}}}]'
+  -p='[{"op":"replace","path":"/spec/template/spec/containers/0/args","value":["--cert-dir=/tmp","--secure-port=10250","--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname","--kubelet-use-node-status-port","--metric-resolution=15s","--kubelet-insecure-tls","--authentication-skip-lookup=true"]}]'
 
 kubectl --kubeconfig=$HOME/.kube/config-member2 apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 kubectl --kubeconfig=$HOME/.kube/config-member2 patch deployment metrics-server -n kube-system --type='json' \
-  -p='[{"op":"replace","path":"/spec/template/spec/containers/0/args","value":["--cert-dir=/tmp","--secure-port=10250","--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname","--kubelet-use-node-status-port","--metric-resolution=15s","--kubelet-insecure-tls","--authentication-skip-lookup=true"]},{"op":"replace","path":"/spec/template/spec/containers/0/resources","value":{"requests":{"cpu":"10m","memory":"32Mi"},"limits":{"cpu":"100m","memory":"128Mi"}}}]'
+  -p='[{"op":"replace","path":"/spec/template/spec/containers/0/args","value":["--cert-dir=/tmp","--secure-port=10250","--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname","--kubelet-use-node-status-port","--metric-resolution=15s","--kubelet-insecure-tls","--authentication-skip-lookup=true"]}]'
 EOF
     chmod +x installMetricsServer.sh
 
