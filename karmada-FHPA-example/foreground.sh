@@ -22,9 +22,17 @@ EOF
 function createCluster() {
     cat << EOF > createCluster.sh
     kind create cluster --name=member1 --config=cluster1.yaml
-    mv $HOME/.kube/config ~/config-member1
+    # Patch kindnet to use less CPU
+    kubectl --kubeconfig \$HOME/.kube/config patch daemonset kindnet -n kube-system --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/resources/requests/cpu", "value": "50m"}, {"op": "replace", "path": "/spec/template/spec/containers/0/resources/limits/cpu", "value": "200m"}]'
+    # Patch coredns
+    kubectl --kubeconfig \$HOME/.kube/config patch deployment coredns -n kube-system --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/resources/requests/cpu", "value": "30m"}, {"op": "replace", "path": "/spec/template/spec/containers/0/resources/limits/cpu", "value": "100m"}]'
+    mv \$HOME/.kube/config ~/config-member1
+
     kind create cluster --name=member2 --config=cluster2.yaml
-    mv $HOME/.kube/config config-member2
+    kubectl --kubeconfig \$HOME/.kube/config patch daemonset kindnet -n kube-system --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/resources/requests/cpu", "value": "50m"}, {"op": "replace", "path": "/spec/template/spec/containers/0/resources/limits/cpu", "value": "200m"}]'
+    kubectl --kubeconfig \$HOME/.kube/config patch deployment coredns -n kube-system --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/resources/requests/cpu", "value": "30m"}, {"op": "replace", "path": "/spec/template/spec/containers/0/resources/limits/cpu", "value": "100m"}]'
+    mv \$HOME/.kube/config config-member2
+
     KUBECONFIG=~/config-member1:~/config-member2 kubectl config view --merge --flatten >> ${KUBECONFIG_PATH}/config
     # modify ip
     sed -i "s/${local_ip}/${member_cluster_ip}/g"  config-member1
@@ -42,6 +50,15 @@ function cluster1Config() {
     networking:
       apiServerAddress: "${member_cluster_ip}"
       apiServerPort: 6443
+    nodes:
+    - role: control-plane
+      resources:
+        requests:
+          cpu: "500m"
+          memory: "1Gi"
+        limits:
+          cpu: "1000m"
+          memory: "2Gi"
 EOF
 }
 
@@ -52,6 +69,15 @@ function cluster2Config() {
     networking:
       apiServerAddress: "${member_cluster_ip}"
       apiServerPort: 6444
+    nodes:
+    - role: control-plane
+      resources:
+        requests:
+          cpu: "500m"
+          memory: "1Gi"
+        limits:
+          cpu: "1000m"
+          memory: "2Gi"
 EOF
 }
 
