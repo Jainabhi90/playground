@@ -1,114 +1,23 @@
-### Deploy Application and PropagationPolicy
+# Join Member Clusters
 
-First, let's create a Deployment and a `PropagationPolicy` that specifies application failover settings.
-The failover behavior is configured using the `failover.application` field in the `PropagationPolicy`.
+**Join `kind-member1`:**
 
-1. Create a YAML file with the Deployment and PropagationPolicy.
+RUN `karmadactl --kubeconfig /etc/karmada/karmada-apiserver.config join kind-member1 --cluster-kubeconfig=$HOME/.kube/config-member1 --cluster-context=kind-member1`{{exec}}
 
-   <details>
-   <summary>nginx-failover.yaml</summary>
+This registers the member1 cluster with the Karmada control plane for scheduling.
 
-   ```yaml
-   apiVersion: policy.karmada.io/v1alpha1
-   kind: PropagationPolicy
-   metadata:
-     name: nginx-propagation
-   spec:
-     failover:
-       application:
-         decisionConditions:
-           tolerationSeconds: 120
-         purgeMode: Never
-     propagateDeps: true # application failover is set, propagateDeps must be true
-     resourceSelectors:
-       - apiVersion: apps/v1
-         kind: Deployment
-         name: nginx
-     placement:
-       clusterAffinity:
-         clusterNames:
-           - kind-member1
-           - kind-member2
-       spreadConstraints:
-         - maxGroups: 1
-           minGroups: 1
-           spreadByField: cluster
-   ---
-   apiVersion: apps/v1
-   kind: Deployment
-   metadata:
-     name: nginx
-     labels:
-       app: nginx
-   spec:
-     replicas: 2
-     selector:
-       matchLabels:
-         app: nginx
-     template:
-       metadata:
-         labels:
-           app: nginx
-       spec:
-         containers:
-         - image: nginx
-           name: nginx
-   ```
-   </details>
+**Join `kind-member2`:**
 
-   RUN `cat <<EOF > nginx-failover.yaml
-   apiVersion: policy.karmada.io/v1alpha1
-   kind: PropagationPolicy
-   metadata:
-     name: nginx-propagation
-   spec:
-     failover:
-       application:
-         decisionConditions:
-           tolerationSeconds: 120
-         purgeMode: Never
-     propagateDeps: true
-     resourceSelectors:
-       - apiVersion: apps/v1
-         kind: Deployment
-         name: nginx
-     placement:
-       clusterAffinity:
-         clusterNames:
-           - kind-member1
-           - kind-member2
-       spreadConstraints:
-         - maxGroups: 1
-           minGroups: 1
-           spreadByField: cluster
-   ---
-   apiVersion: apps/v1
-   kind: Deployment
-   metadata:
-     name: nginx
-     labels:
-       app: nginx
-   spec:
-     replicas: 2
-     selector:
-       matchLabels:
-         app: nginx
-     template:
-       metadata:
-         labels:
-           app: nginx
-       spec:
-         containers:
-         - image: nginx
-           name: nginx
-   EOF`{{exec}}
+RUN `karmadactl --kubeconfig /etc/karmada/karmada-apiserver.config join kind-member2 --cluster-kubeconfig=$HOME/.kube/config-member2 --cluster-context=kind-member2`{{exec}}
 
-2. Apply the configuration.
+This registers the member2 cluster with the Karmada control plane for scheduling.
 
-   RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config apply -f nginx-failover.yaml`{{exec}}
+**Check joined clusters:**
 
-3. Check which cluster the application was scheduled to by inspecting the `ResourceBinding`.
+RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get clusters`{{exec}}
 
-   RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get rb`{{exec}}
+This lists all clusters currently managed by Karmada. Both clusters should show `READY=True`.
 
-   Since the `spreadConstraints` specify `maxGroups: 1` and `minGroups: 1`, Karmada will schedule all replicas to a single cluster. We will assume it was scheduled to `kind-member2` or `kind-member1`. In the next step, we'll verify where it landed and taint that cluster to simulate failure.
+![Expected output: both member clusters showing READY=True](../image/success.png)
+
+**Note:** If a join command fails because the cluster is already registered, continue to the cluster check command.

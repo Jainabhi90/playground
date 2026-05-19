@@ -36,7 +36,6 @@ EOF
 }
 
 function cluster1Config() {
-    touch cluster1.yaml
     cat << EOF > cluster1.yaml
     kind: Cluster
     apiVersion: kind.x-k8s.io/v1alpha4
@@ -47,13 +46,65 @@ EOF
 }
 
 function cluster2Config() {
-    touch cluster2.yaml
-    cat << EOF > cluster2.yaml
+    cat << EOF > cluster2.yaml 
     kind: Cluster
     apiVersion: kind.x-k8s.io/v1alpha4
     networking:
       apiServerAddress: "${member_cluster_ip}"
       apiServerPort: 6444
+EOF
+}
+
+function nginxDeployment() {
+    cat << EOF > nginxDeployment.yaml
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: nginx
+      labels:
+        app: nginx
+    spec:
+      replicas: 2
+      selector:
+        matchLabels:
+          app: nginx
+      template:
+        metadata:
+          labels:
+            app: nginx
+        spec:
+          containers:
+          - image: nginx
+            name: nginx
+EOF
+}
+
+function propagationPolicy() {
+    cat << EOF > propagationPolicy.yaml
+    apiVersion: policy.karmada.io/v1alpha1
+    kind: PropagationPolicy
+    metadata:
+      name: nginx-propagation
+    spec:
+      failover:
+        application:
+          decisionConditions:
+            tolerationSeconds: 120
+          purgeMode: Never
+      propagateDeps: true
+      resourceSelectors:
+        - apiVersion: apps/v1
+          kind: Deployment
+          name: nginx
+      placement:
+        clusterAffinity:
+          clusterNames:
+            - kind-member1
+            - kind-member2
+        spreadConstraints:
+          - maxGroups: 1
+            minGroups: 1
+            spreadByField: cluster
 EOF
 }
 
@@ -76,5 +127,11 @@ cluster1Config
 cluster2Config
 copyConfigFilesToNode
 
-# clean screen
+# generate nginx config
+mkdir nginx
+cd nginx
+nginxDeployment
+propagationPolicy
+
+# clean screen 
 clear

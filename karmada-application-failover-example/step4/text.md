@@ -1,24 +1,23 @@
-### Prepare member clusters
+# Prepare Member Clusters
 
-**Install Kind on the member node:**
+With the Karmada control plane running, you can now create the member clusters on `node01`.
+
+**Install Kind on member node:**
 
 RUN `ssh -o StrictHostKeyChecking=no root@172.30.2.2 "bash ~/installKind.sh"`{{exec}}
 
-This command connects to node01 via SSH and installs Kind (Kubernetes in Docker), which is used to create local Kubernetes clusters.
+This installs Kind on the remote node to enable creation of Kubernetes clusters.
 
-**Create two clusters (`member1` and `member2`):**
+**Create member clusters:**
 
 RUN `ssh -o StrictHostKeyChecking=no root@172.30.2.2 "bash ~/createCluster.sh"`{{exec}}
 
-This script creates two Kubernetes clusters (`member1` and `member2`) and copies their kubeconfig files back to the host node.
-This step may take 1-2 minutes.
+This creates two Kubernetes member clusters (`member1` and `member2`) using Kind, and copies their kubeconfig files to the controlplane node.
 
-**Verify clusters:**
+> **Note:** This step may take **1–2 minutes** — wait for the prompt to return before proceeding.
 
-RUN `kubectl --kubeconfig=$HOME/.kube/config-member1 config get-contexts kind-member1`{{exec}}
+**Verify clusters were created:**
 
-This verifies that the member1 cluster context is correctly configured.
+RUN `ssh -o StrictHostKeyChecking=no root@172.30.2.2 "kind get clusters"`{{exec}}
 
-RUN `kubectl --kubeconfig=$HOME/.kube/config-member2 config get-contexts kind-member2`{{exec}}
-
-This verifies that the member2 cluster context is available.
+Both `member1` and `member2` should appear in the output.

@@ -1,4 +1,4 @@
-### Environment overview
+# Environment Overview
 
 The environment consists of two hosts:
 
@@ -10,4 +10,4 @@ The environment consists of two hosts:
 | controlplane | 172.30.1.2 |
 | node01 | 172.30.2.2 |
 
-Note: The current terminal is on the host `controlplane`.
+Note: The current terminal is on the host controlplane.

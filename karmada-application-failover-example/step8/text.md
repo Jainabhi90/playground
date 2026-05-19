@@ -1,19 +1,46 @@
-### Verify Application failover
+# Create PropagationPolicy for Application Failover
 
-After the `tolerationSeconds` (120s) is reached, Karmada will evict the deployment in the failed cluster and re-schedule it to the healthy cluster.
+**Create PropagationPolicy for `nginx` with application failover:**
 
-1. Wait for approximately 2 minutes, then check the `ResourceBinding` again.
+RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config apply -f ~/nginx/propagationPolicy.yaml`{{exec}}
 
-   RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get rb`{{exec}}
+This applies a policy that enables application-level failover.
+<details>
+<summary>propagationPolicy.yaml</summary>
 
-2. Verify the new cluster assignment and the `gracefulEvictionTasks`.
+```yaml
+apiVersion: policy.karmada.io/v1alpha1
+kind: PropagationPolicy
+metadata:
+  name: nginx-propagation
+spec:
+  failover:
+    application:
+      decisionConditions:
+        tolerationSeconds: 120
+      purgeMode: Never
+  propagateDeps: true
+  resourceSelectors:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: nginx
+  placement:
+    clusterAffinity:
+      clusterNames:
+        - kind-member1
+        - kind-member2
+    spreadConstraints:
+      - maxGroups: 1
+        minGroups: 1
+        spreadByField: cluster
+```
 
-   RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get rb nginx-deployment -o yaml | grep -A 10 clusters:`{{exec}}
+</details>
 
-   You will notice that the application has been re-scheduled to the other member cluster. You will also see a `gracefulEvictionTasks` section indicating that the application was evicted from the previous cluster due to `ApplicationFailure`, with `suppressDeletion: true` (since `purgeMode` is set to `Never`).
+This policy selects the nginx Deployment and configures it so that if the application fails and is unhealthy for 120 seconds (`tolerationSeconds: 120`), it will be evicted and re-scheduled to another cluster.
 
-3. You can edit `suppressDeletion` to `false` in `gracefulEvictionTasks` to fully evict the application in the failed cluster after you confirm the failure.
+**Verify policy exists:**
 
-   RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config patch rb nginx-deployment --type='json' -p='[{"op": "replace", "path": "/spec/gracefulEvictionTasks/0/suppressDeletion", "value": false}]'`{{exec}}
+RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get propagationpolicy nginx-propagation`{{exec}}
 
-   After patching, the legacy application in the failed cluster will be purged.
+This checks that the propagation policy has been successfully created.

@@ -1,13 +1,15 @@
-### Initialize Karmada control plane
+# Initialize Karmada
 
 **Initialize Karmada control plane:**
 
 RUN `karmadactl init`{{exec}}
 
-This sets up the Karmada control plane on the host cluster, including API server and controllers.
+This bootstraps the Karmada control plane on the host cluster.
+
+> **Note:** `karmadactl init` deploys etcd, the Karmada API server, scheduler, and controller manager. This takes approximately **2–3 minutes** — wait for the prompt to return before proceeding.
 
 **Verify initialization:**
 
 RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config config get-contexts karmada-apiserver`{{exec}}
 
-This ensures that the Karmada API server context is available and configured correctly.
+This confirms the Karmada API server context is available.

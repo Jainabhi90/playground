@@ -1,0 +1,26 @@
+### Simulate cluster failure
+
+Now we will construct an abnormal state for the application. We will identify the cluster where the application is currently running, taint its node, and evict the replicas.
+
+1. Determine the cluster where the application was scheduled.
+
+   RUN `TARGET_CLUSTER=$(kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get rb nginx-deployment -o jsonpath='{.spec.clusters[0].name}')`{{exec}}
+
+   RUN `echo "The application is scheduled on: $TARGET_CLUSTER"`{{exec}}
+
+2. Mark the node as unschedulable in the target cluster.
+   We construct the node name based on the cluster name (e.g., `kind-member1` has a node named `member1-control-plane`).
+
+   RUN `TARGET_NODE=$(echo $TARGET_CLUSTER | sed 's/kind-//')-control-plane`{{exec}}
+
+   RUN `kubectl --context $TARGET_CLUSTER cordon $TARGET_NODE`{{exec}}
+
+3. Delete the pod in the target cluster to construct the abnormal state.
+
+   RUN `kubectl --context $TARGET_CLUSTER delete pod -l app=nginx`{{exec}}
+
+4. Verify that the application is in an `Unhealthy` state.
+
+   RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get rb nginx-deployment -o yaml | grep -A 5 aggregatedStatus`{{exec}}
+
+   You will find that `health: Unhealthy` and `availableReplicas: 0`.

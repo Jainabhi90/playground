@@ -1,2 +1,5 @@
 #!/bin/bash
-kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get propagationpolicy nginx-propagation
+set -e
+
+kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get cluster kind-member1
+kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get cluster kind-member2

@@ -1,3 +1,5 @@
 #!/bin/bash
+set -e
 
-test -f "$HOME/.kube/config"
+# Verify node01 is reachable
+ssh -o StrictHostKeyChecking=no root@172.30.2.2 "echo node01 ready"
