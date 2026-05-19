@@ -13,11 +13,13 @@ Now we will construct an abnormal state for the application. We will identify th
 
    RUN `TARGET_NODE=$(echo $TARGET_CLUSTER | sed 's/kind-//')-control-plane`{{exec}}
 
-   RUN `kubectl --context $TARGET_CLUSTER cordon $TARGET_NODE`{{exec}}
+   RUN `TARGET_KUBECONFIG=$HOME/.kube/config-$(echo $TARGET_CLUSTER | sed 's/kind-//')`{{exec}}
+
+   RUN `kubectl --kubeconfig $TARGET_KUBECONFIG --context $TARGET_CLUSTER cordon $TARGET_NODE`{{exec}}
 
 3. Delete the pod in the target cluster to construct the abnormal state.
 
-   RUN `kubectl --context $TARGET_CLUSTER delete pod -l app=nginx`{{exec}}
+   RUN `kubectl --kubeconfig $TARGET_KUBECONFIG --context $TARGET_CLUSTER delete pod -l app=nginx`{{exec}}
 
 4. Verify that the application is in an `Unhealthy` state.
 
