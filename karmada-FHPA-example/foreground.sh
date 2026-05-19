@@ -52,13 +52,6 @@ function cluster1Config() {
       apiServerPort: 6443
     nodes:
     - role: control-plane
-      resources:
-        requests:
-          cpu: "500m"
-          memory: "1Gi"
-        limits:
-          cpu: "1000m"
-          memory: "2Gi"
 EOF
 }
 
@@ -71,13 +64,6 @@ function cluster2Config() {
       apiServerPort: 6444
     nodes:
     - role: control-plane
-      resources:
-        requests:
-          cpu: "500m"
-          memory: "1Gi"
-        limits:
-          cpu: "1000m"
-          memory: "2Gi"
 EOF
 }
 
@@ -125,10 +111,10 @@ spec:
         name: nginx
         resources:
           requests:
-            cpu: 25m
-            memory: 64Mi
+            cpu: 10m
+            memory: 32Mi
           limits:
-            cpu: 25m
+            cpu: 100m
             memory: 64Mi
 ---
 apiVersion: v1
@@ -191,7 +177,7 @@ spec:
     kind: Deployment
     name: nginx
   minReplicas: 1
-  maxReplicas: 10
+  maxReplicas: 4
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 10
