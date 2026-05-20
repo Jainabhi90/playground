@@ -1,10 +1,12 @@
 ### Verify Application failover
 
-After the `tolerationSeconds` (120s) is reached, Karmada will re-schedule the deployment to the healthy cluster. Because `purgeMode` is set to `Never`, the legacy copy remains until you clear `suppressDeletion`.
+After the `tolerationSeconds` (120s) is reached, Karmada will re-schedule the deployment to the healthy cluster.
 
-1. Wait for approximately 2 minutes, then check the `ResourceBinding` again.
+1. Wait for failover to complete (automated polling)
 
-   RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get rb`{{exec}}
+   Instead of guessing, poll until failover is detected:
+
+   RUN `for i in {1..30}; do CLUSTERS=$(kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get rb nginx-deployment -o jsonpath='{.spec.clusters[*].name}'); if [[ "$CLUSTERS" != *"$TARGET_CLUSTER"* ]]; then echo "✓ Failover complete! Application now on: $CLUSTERS"; break; fi; echo "Waiting for failover... ($i/30, ~$(($i * 10))s elapsed)"; sleep 10; done`{{exec}}
 
 2. Verify the new cluster assignment and the `gracefulEvictionTasks`.
 
