@@ -25,6 +25,6 @@ Now we will construct an abnormal state for the application. We will identify th
 
 4. Verify that the application is in an `Unhealthy` state.
 
-   RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get rb nginx-deployment -o yaml | grep -A 5 aggregatedStatus`{{exec}}
+   RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get rb nginx-deployment -o yaml | sed -n '/aggregatedStatus/,+15p'`{{exec}}
 
-   You will find that `health: Unhealthy` and `availableReplicas: 0`.
+   You will find `health: Unhealthy`. Depending on reporting, `availableReplicas` may be omitted when zero; it is normal to see `unavailableReplicas: 2` instead.
