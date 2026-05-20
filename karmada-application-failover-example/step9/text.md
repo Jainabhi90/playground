@@ -4,7 +4,7 @@ Now we will construct an abnormal state for the application. We will identify th
 
 1. Determine the cluster where the application was scheduled.
 
-   RUN `TARGET_CLUSTER=$(kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get rb nginx-deployment -o jsonpath='{.spec.clusters[0].name}')`{{exec}}
+   RUN `TARGET_CLUSTER=$(kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get rb nginx-deployment -o jsonpath='{.spec.clusters[0].name}') && if [ -z "$TARGET_CLUSTER" ]; then echo "Error: Failed to determine target cluster"; exit 1; fi`{{exec}}
 
    RUN `echo "The application is scheduled on: $TARGET_CLUSTER"`{{exec}}
 

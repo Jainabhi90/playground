@@ -4,6 +4,10 @@ After the `tolerationSeconds` (120s) is reached, Karmada will re-schedule the de
 
 1. Wait for failover to complete (automated polling)
 
+   First, export TARGET_CLUSTER from the previous step:
+
+   RUN `export TARGET_CLUSTER=$(kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get rb nginx-deployment -o jsonpath='{.spec.clusters[0].name}')`{{exec}}
+
    Instead of guessing, poll until failover is detected:
 
    RUN `for i in {1..30}; do CLUSTERS=$(kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get rb nginx-deployment -o jsonpath='{.spec.clusters[*].name}'); if [[ "$CLUSTERS" != *"$TARGET_CLUSTER"* ]]; then echo "✓ Failover complete! Application now on: $CLUSTERS"; break; fi; echo "Waiting for failover... ($i/30, ~$(($i * 10))s elapsed)"; sleep 10; done`{{exec}}
@@ -18,11 +22,9 @@ After the `tolerationSeconds` (120s) is reached, Karmada will re-schedule the de
 
    > **Note:** If `gracefulEvictionTasks` is empty, wait a bit longer and ensure `health: Unhealthy` appears under `aggregatedStatus`.
 
-3. You can edit `suppressDeletion` to `false` in `gracefulEvictionTasks` to fully evict the application in the failed cluster after you confirm the failure. If multiple tasks are listed, repeat the patch for each index.
+3. Set `suppressDeletion` to `false` for all gracefulEvictionTasks to fully evict the application in the failed cluster.
 
-   RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config patch rb nginx-deployment --type='json' -p='[{"op": "replace", "path": "/spec/gracefulEvictionTasks/0/suppressDeletion", "value": false}]'`{{exec}}
-
-   RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config patch rb nginx-deployment --type='json' -p='[{"op": "replace", "path": "/spec/gracefulEvictionTasks/1/suppressDeletion", "value": false}]'`{{exec}}
+   RUN `TASK_COUNT=$(kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get rb nginx-deployment -o jsonpath='{.spec.gracefulEvictionTasks | length}'); for i in $(seq 0 $((TASK_COUNT - 1))); do kubectl --kubeconfig /etc/karmada/karmada-apiserver.config patch rb nginx-deployment --type='json' -p="[{\"op\": \"replace\", \"path\": \"/spec/gracefulEvictionTasks/$i/suppressDeletion\", \"value\": false}]"; done`{{exec}}
 
    After patching, the legacy application in the failed cluster will be purged.
 
@@ -35,3 +37,4 @@ After the `tolerationSeconds` (120s) is reached, Karmada will re-schedule the de
    RUN `FAILED_KUBECONFIG=$HOME/.kube/config-$(echo $FAILED_CLUSTER | sed 's/kind-//')`{{exec}}
 
    RUN `kubectl --kubeconfig $FAILED_KUBECONFIG --context $FAILED_CLUSTER uncordon $FAILED_NODE`{{exec}}
+
