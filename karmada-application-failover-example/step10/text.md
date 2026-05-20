@@ -32,9 +32,9 @@ After the `tolerationSeconds` (120s) is reached, Karmada will re-schedule the de
 
    RUN `FAILED_CLUSTER=$(kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get rb nginx-deployment -o jsonpath='{.spec.gracefulEvictionTasks[0].fromCluster}')`{{exec}}
 
-   RUN `FAILED_NODE=$(echo $FAILED_CLUSTER | sed 's/kind-//')-control-plane`{{exec}}
+   RUN `FAILED_NODE=$(echo "$FAILED_CLUSTER" | sed 's/kind-//')-control-plane`{{exec}}
 
-   RUN `FAILED_KUBECONFIG=$HOME/.kube/config-$(echo $FAILED_CLUSTER | sed 's/kind-//')`{{exec}}
+   RUN `FAILED_KUBECONFIG=$HOME/.kube/config-$(echo "$FAILED_CLUSTER" | sed 's/kind-//')`{{exec}}
 
-   RUN `kubectl --kubeconfig $FAILED_KUBECONFIG --context $FAILED_CLUSTER uncordon $FAILED_NODE`{{exec}}
+   RUN `kubectl --kubeconfig "$FAILED_KUBECONFIG" --context "$FAILED_CLUSTER" uncordon "$FAILED_NODE"`{{exec}}
 
