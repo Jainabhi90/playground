@@ -1,6 +1,6 @@
 ### Simulate cluster failure
 
-Now we will construct an abnormal state for the application. We will identify the cluster where the application is currently running, taint its node, and evict the replicas.
+Now we will construct an abnormal state for the application. We will identify the cluster where the application is currently running, cordon its node (mark it unschedulable), and evict the replicas.
 
 1. Determine the cluster where the application was scheduled.
 
@@ -16,6 +16,8 @@ Now we will construct an abnormal state for the application. We will identify th
    RUN `TARGET_KUBECONFIG=$HOME/.kube/config-$(echo $TARGET_CLUSTER | sed 's/kind-//')`{{exec}}
 
    RUN `kubectl --kubeconfig $TARGET_KUBECONFIG --context $TARGET_CLUSTER cordon $TARGET_NODE`{{exec}}
+
+   > **Note:** Cordon prevents scheduling on the node. You will uncordon it after failover verification so pods can run again.
 
 3. Delete the pod in the target cluster to construct the abnormal state.
 

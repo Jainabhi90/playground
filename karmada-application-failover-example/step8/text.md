@@ -37,7 +37,7 @@ spec:
 
 </details>
 
-This policy selects the nginx Deployment and configures it so that if the application fails and is unhealthy for 120 seconds (`tolerationSeconds: 120`), it will be evicted and re-scheduled to another cluster.
+This policy selects the nginx Deployment and configures it so that if the application fails and is unhealthy for 120 seconds (`tolerationSeconds: 120`), it will be re-scheduled to another cluster. Since `purgeMode: Never`, the legacy copy stays until you clear `suppressDeletion` in `gracefulEvictionTasks`.
 
 **Verify policy exists:**
 
