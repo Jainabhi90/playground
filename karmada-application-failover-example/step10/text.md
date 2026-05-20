@@ -24,7 +24,7 @@ After the `tolerationSeconds` (120s) is reached, Karmada will re-schedule the de
 
 3. Set `suppressDeletion` to `false` for all gracefulEvictionTasks to fully evict the application in the failed cluster.
 
-   RUN `TASK_COUNT=$(kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get rb nginx-deployment -o jsonpath='{.spec.gracefulEvictionTasks | length}'); for i in $(seq 0 $((TASK_COUNT - 1))); do kubectl --kubeconfig /etc/karmada/karmada-apiserver.config patch rb nginx-deployment --type='json' -p="[{\"op\": \"replace\", \"path\": \"/spec/gracefulEvictionTasks/$i/suppressDeletion\", \"value\": false}]"; done`{{exec}}
+   RUN `TASK_COUNT=$(kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get rb nginx-deployment -o json | jq '.spec.gracefulEvictionTasks | length'); for i in $(seq 0 $((TASK_COUNT - 1))); do kubectl --kubeconfig /etc/karmada/karmada-apiserver.config patch rb nginx-deployment --type='json' -p="[{\"op\": \"replace\", \"path\": \"/spec/gracefulEvictionTasks/$i/suppressDeletion\", \"value\": false}]"; done`{{exec}}
 
    After patching, the legacy application in the failed cluster will be purged.
 
