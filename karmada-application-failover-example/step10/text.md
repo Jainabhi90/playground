@@ -30,11 +30,9 @@ After the `tolerationSeconds` (120s) is reached, Karmada will re-schedule the de
 
 4. Uncordon the node you cordoned in the failed cluster so it can schedule workloads again.
 
-   RUN `FAILED_CLUSTER=$(kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get rb nginx-deployment -o jsonpath='{.spec.gracefulEvictionTasks[0].fromCluster}')`{{exec}}
+   The failed cluster was the one you cordoned in step 9. Based on the earlier steps, uncordon it:
 
-   RUN `FAILED_NODE=$(echo "$FAILED_CLUSTER" | sed 's/kind-//')-control-plane`{{exec}}
+   RUN `kubectl --kubeconfig=$HOME/.kube/config-member1 --context=kind-member1 uncordon member1-control-plane`{{exec}}
 
-   RUN `FAILED_KUBECONFIG=$HOME/.kube/config-$(echo "$FAILED_CLUSTER" | sed 's/kind-//')`{{exec}}
-
-   RUN `kubectl --kubeconfig "$FAILED_KUBECONFIG" --context "$FAILED_CLUSTER" uncordon "$FAILED_NODE"`{{exec}}
+   > **Note:** If you need to find which cluster was the source of the gracefulEvictionTasks, check `kubectl get rb nginx-deployment -o yaml` before cleanup completes. The cluster name is in `spec.gracefulEvictionTasks[0].fromCluster`.
 
