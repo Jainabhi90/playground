@@ -13,4 +13,4 @@ This creates a `FederatedHPA` that monitors the CPU utilization of all nginx pod
 
 RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get federatedhpa nginx-fhpa`{{exec}}
 
-You should see `nginx-fhpa` listed with `MINPODS=1`, `MAXPODS=10`, and `REPLICAS=1`.
+You should see `nginx-fhpa` listed with `MINPODS=1`, `MAXPODS=4`, and `REPLICAS=1`.
