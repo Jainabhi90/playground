@@ -21,6 +21,7 @@ EOF
 
 function createCluster() {
     cat << EOF > createCluster.sh
+  kind delete cluster --name=member1 || true
     kind create cluster --name=member1 --config=cluster1.yaml
     # Patch kindnet to use less CPU
     kubectl --kubeconfig \$HOME/.kube/config patch daemonset kindnet -n kube-system --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/resources/requests/cpu", "value": "50m"}, {"op": "replace", "path": "/spec/template/spec/containers/0/resources/limits/cpu", "value": "200m"}]'
@@ -28,6 +29,7 @@ function createCluster() {
     kubectl --kubeconfig \$HOME/.kube/config patch deployment coredns -n kube-system --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/resources/requests/cpu", "value": "30m"}, {"op": "replace", "path": "/spec/template/spec/containers/0/resources/limits/cpu", "value": "100m"}]'
     mv \$HOME/.kube/config ~/config-member1
 
+  kind delete cluster --name=member2 || true
     kind create cluster --name=member2 --config=cluster2.yaml
     kubectl --kubeconfig \$HOME/.kube/config patch daemonset kindnet -n kube-system --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/resources/requests/cpu", "value": "50m"}, {"op": "replace", "path": "/spec/template/spec/containers/0/resources/limits/cpu", "value": "200m"}]'
     kubectl --kubeconfig \$HOME/.kube/config patch deployment coredns -n kube-system --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/resources/requests/cpu", "value": "30m"}, {"op": "replace", "path": "/spec/template/spec/containers/0/resources/limits/cpu", "value": "100m"}]'
