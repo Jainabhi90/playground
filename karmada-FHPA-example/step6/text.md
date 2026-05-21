@@ -4,4 +4,4 @@ The FederatedHPA relies on a two-layer metrics pipeline. First, `metrics-server`
 
 RUN `bash ~/installMetricsServer.sh`{{exec}}
 
-This script installs `metrics-server` on both `kind-member1` and `kind-member2`. Wait a few moments for the pods to start before proceeding.
+This helper downloads the upstream manifest, adds `--kubelet-insecure-tls=true`, and applies it to both `kind-member1` and `kind-member2`. Wait a few moments for the pods to start before proceeding.

@@ -21,7 +21,7 @@ EOF
 
 function createCluster() {
     cat << EOF > createCluster.sh
-  kind delete cluster --name=member1 || true
+    kind delete cluster --name=member1 || true
     kind create cluster --name=member1 --config=cluster1.yaml
     # Patch kindnet to use less CPU
     kubectl --kubeconfig \$HOME/.kube/config patch daemonset kindnet -n kube-system --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/resources/requests/cpu", "value": "50m"}, {"op": "replace", "path": "/spec/template/spec/containers/0/resources/limits/cpu", "value": "200m"}]'
@@ -29,7 +29,7 @@ function createCluster() {
     kubectl --kubeconfig \$HOME/.kube/config patch deployment coredns -n kube-system --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/resources/requests/cpu", "value": "30m"}, {"op": "replace", "path": "/spec/template/spec/containers/0/resources/limits/cpu", "value": "100m"}]'
     mv \$HOME/.kube/config ~/config-member1
 
-  kind delete cluster --name=member2 || true
+    kind delete cluster --name=member2 || true
     kind create cluster --name=member2 --config=cluster2.yaml
     kubectl --kubeconfig \$HOME/.kube/config patch daemonset kindnet -n kube-system --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/resources/requests/cpu", "value": "50m"}, {"op": "replace", "path": "/spec/template/spec/containers/0/resources/limits/cpu", "value": "200m"}]'
     kubectl --kubeconfig \$HOME/.kube/config patch deployment coredns -n kube-system --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/resources/requests/cpu", "value": "30m"}, {"op": "replace", "path": "/spec/template/spec/containers/0/resources/limits/cpu", "value": "100m"}]'
@@ -76,13 +76,27 @@ EOF
 function installMetrics() {
     cat << 'EOF' > installMetricsServer.sh
 # Install metrics-server on member clusters
-kubectl --kubeconfig=$HOME/.kube/config-member1 apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-kubectl --kubeconfig=$HOME/.kube/config-member1 patch deployment metrics-server -n kube-system --type='json' \
-  -p='[{"op":"replace","path":"/spec/template/spec/containers/0/args","value":["--cert-dir=/tmp","--secure-port=10250","--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname","--kubelet-use-node-status-port","--metric-resolution=15s","--kubelet-insecure-tls","--authentication-skip-lookup=true"]}]'
+_tmp=$(mktemp -d)
 
-kubectl --kubeconfig=$HOME/.kube/config-member2 apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-kubectl --kubeconfig=$HOME/.kube/config-member2 patch deployment metrics-server -n kube-system --type='json' \
-  -p='[{"op":"replace","path":"/spec/template/spec/containers/0/args","value":["--cert-dir=/tmp","--secure-port=10250","--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname","--kubelet-use-node-status-port","--metric-resolution=15s","--kubelet-insecure-tls","--authentication-skip-lookup=true"]}]'
+cleanup() {
+  rm -rf "${_tmp}"
+}
+trap cleanup EXIT
+
+METRICS_SERVER_URL="https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml"
+if command -v curl &>/dev/null && curl -fsSL "${METRICS_SERVER_URL}" -o "${_tmp}/components.yaml"; then
+  :
+elif command -v wget &>/dev/null && wget -qO "${_tmp}/components.yaml" "${METRICS_SERVER_URL}"; then
+  :
+else
+  echo "ERROR: failed to download metrics-server components.yaml. Please ensure curl or wget is installed and network access is available."
+  exit 1
+fi
+
+sed -i'' -e 's/args:/args:\n        - --kubelet-insecure-tls=true/' "${_tmp}/components.yaml"
+
+kubectl --kubeconfig=$HOME/.kube/config-member1 apply -f "${_tmp}/components.yaml"
+kubectl --kubeconfig=$HOME/.kube/config-member2 apply -f "${_tmp}/components.yaml"
 EOF
     chmod +x installMetricsServer.sh
 
