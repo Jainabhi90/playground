@@ -24,7 +24,7 @@ This launches a background pod inside `kind-member1` that continuously sends HTT
 
 ## Observe scale-up
 
-Wait ~15–30 seconds after starting the load, then check the FederatedHPA status:
+Wait ~10–25 seconds after starting the load, then check the FederatedHPA status:
 
 RUN `kubectl --kubeconfig /etc/karmada/karmada-apiserver.config get federatedhpa nginx-fhpa`{{exec}}
 
