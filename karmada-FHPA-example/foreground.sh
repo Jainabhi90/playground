@@ -50,6 +50,8 @@ function cluster1Config() {
     networking:
       apiServerAddress: "${member_cluster_ip}"
       apiServerPort: 6443
+      serviceSubnet: "10.250.0.0/16"
+      podSubnet: "10.251.0.0/16"
     nodes:
     - role: control-plane
 EOF
@@ -62,6 +64,8 @@ function cluster2Config() {
     networking:
       apiServerAddress: "${member_cluster_ip}"
       apiServerPort: 6444
+      serviceSubnet: "10.250.0.0/16"
+      podSubnet: "10.251.0.0/16"
     nodes:
     - role: control-plane
 EOF
